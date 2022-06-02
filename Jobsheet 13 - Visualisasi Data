@@ -1,0 +1,515 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled12.ipynb",
+      "provenance": [],
+      "authorship_tag": "ABX9TyM4TG2uYonw/GpsLIIneFDF",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/dhiyashafa/BigData/blob/main/Jobsheet%2013%20-%20Visualisasi%20Data\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "**Langkah Praktikum**"
+      ],
+      "metadata": {
+        "id": "_TZE8v2IVLcQ"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "id": "EOkuB-04PQ9Q"
+      },
+      "outputs": [],
+      "source": [
+        "!apt-get install openjdk-8-jdk-headless -qq > /dev/null"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!wget -q https://dlcdn.apache.org/spark/spark-3.2.1/spark-3.2.1-bin-hadoop3.2.tgz\n",
+        "!tar xf spark-3.2.1-bin-hadoop3.2.tgz"
+      ],
+      "metadata": {
+        "id": "6IAl-2kHTrzT"
+      },
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import os\n",
+        "os.environ[\"JAVA_HOME\"] = \"/usr/lib/jvm/java-8-openjdk-amd64\"\n",
+        "os.environ[\"SPARK_HOME\"] = \"/content/spark-3.2.1-bin-hadoop3.2\""
+      ],
+      "metadata": {
+        "id": "_RrvQoDCTvRI"
+      },
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install -q findspark"
+      ],
+      "metadata": {
+        "id": "Iaqph5kWT4L1"
+      },
+      "execution_count": 5,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import findspark\n",
+        "findspark.init()"
+      ],
+      "metadata": {
+        "id": "G5RCt271UFT1"
+      },
+      "execution_count": 6,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.sql import SparkSession\n",
+        "spark = SparkSession.builder\\\n",
+        " .master(\"local\")\\\n",
+        " .appName(\"Colab\")\\\n",
+        " .config('spark.ui.port', '4050')\\\n",
+        " .getOrCreate()"
+      ],
+      "metadata": {
+        "id": "q5jBxpeJUgBv"
+      },
+      "execution_count": 7,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!wget --continue https://raw.githubusercontent.com/dhanifudin/pyspark-demo/main/sample_books.json -O /tmp/sample_books.json"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "yZhrPkWDUqxA",
+        "outputId": "f5be0d3a-8ab6-4c96-a787-d5ffa4dc4a74"
+      },
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "--2022-06-02 07:30:55--  https://raw.githubusercontent.com/dhanifudin/pyspark-demo/main/sample_books.json\n",
+            "Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.108.133, 185.199.109.133, 185.199.110.133, ...\n",
+            "Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.108.133|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 1565 (1.5K) [text/plain]\n",
+            "Saving to: ‘/tmp/sample_books.json’\n",
+            "\n",
+            "\r/tmp/sample_books.j   0%[                    ]       0  --.-KB/s               \r/tmp/sample_books.j 100%[===================>]   1.53K  --.-KB/s    in 0s      \n",
+            "\n",
+            "2022-06-02 07:30:55 (22.9 MB/s) - ‘/tmp/sample_books.json’ saved [1565/1565]\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = spark.read.json(\"/tmp/sample_books.json\")"
+      ],
+      "metadata": {
+        "id": "glpH9N-4UxEp"
+      },
+      "execution_count": 10,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.printSchema()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "UHbYSsBlU142",
+        "outputId": "8597012f-c244-4c5c-94da-fde3542adcac"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "root\n",
+            " |-- author: string (nullable = true)\n",
+            " |-- edition: string (nullable = true)\n",
+            " |-- price: double (nullable = true)\n",
+            " |-- title: string (nullable = true)\n",
+            " |-- year_written: long (nullable = true)\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.show(4,False)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "kxdOXX_tU5Pb",
+        "outputId": "fbc15e12-0b00-4092-e3bf-51a6fd1f7e3b"
+      },
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+---------------+--------------+-----+----------------+------------+\n",
+            "|author         |edition       |price|title           |year_written|\n",
+            "+---------------+--------------+-----+----------------+------------+\n",
+            "|Austen, Jane   |Penguin       |18.2 |Northanger Abbey|1814        |\n",
+            "|Tolstoy, Leo   |Penguin       |12.7 |War and Peace   |1865        |\n",
+            "|Tolstoy, Leo   |Penguin       |13.5 |Anna Karenina   |1875        |\n",
+            "|Woolf, Virginia|Harcourt Brace|25.0 |Mrs. Dalloway   |1925        |\n",
+            "+---------------+--------------+-----+----------------+------------+\n",
+            "only showing top 4 rows\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.count()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "0ISNVZYNVEIO",
+        "outputId": "9306522a-1d96-48de-d8e6-4080b1d5c337"
+      },
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "13"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 13
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.select(\"title\", \"price\", \"year_written\").show(5)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-uIQJVtgVI5s",
+        "outputId": "b4d897e1-f31a-41db-c873-1ea21522b860"
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+----------------+-----+------------+\n",
+            "|           title|price|year_written|\n",
+            "+----------------+-----+------------+\n",
+            "|Northanger Abbey| 18.2|        1814|\n",
+            "|   War and Peace| 12.7|        1865|\n",
+            "|   Anna Karenina| 13.5|        1875|\n",
+            "|   Mrs. Dalloway| 25.0|        1925|\n",
+            "|       The Hours|12.35|        1999|\n",
+            "+----------------+-----+------------+\n",
+            "only showing top 5 rows\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df_filtered = df.filter(\"year_written > 1950 AND price > 10 AND title IS NOT NULL\")\n",
+        "df_filtered.select(\"title\", \"price\", \"year_written\").show(50, False)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sj1ViSssVWjx",
+        "outputId": "75d9e575-3626-44e1-bd30-5fae4fa2bb78"
+      },
+      "execution_count": 15,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-----------------------------+-----+------------+\n",
+            "|title                        |price|year_written|\n",
+            "+-----------------------------+-----+------------+\n",
+            "|The Hours                    |12.35|1999        |\n",
+            "|Harry Potter                 |19.95|2000        |\n",
+            "|One Hundred Years of Solitude|14.0 |1967        |\n",
+            "+-----------------------------+-----+------------+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.sql.functions import *\n",
+        "maxValue = df_filtered.agg(max(\"price\")).collect()[0][0]\n",
+        "print(\"maxValue: \",maxValue)\n",
+        "df_filtered.select(\"title\",\"price\").filter(df.price == maxValue).show(20, False)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "HPnRu9DzVcUk",
+        "outputId": "1d3e6950-1dd9-4e97-df28-86bd7cb52307"
+      },
+      "execution_count": 17,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "maxValue:  19.95\n",
+            "+------------+-----+\n",
+            "|title       |price|\n",
+            "+------------+-----+\n",
+            "|Harry Potter|19.95|\n",
+            "+------------+-----+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "**Tugas**"
+      ],
+      "metadata": {
+        "id": "Nm1aXHxrWCBr"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# No. 1 Tampilkan data buku dengan harga paling murah!\n",
+        "\n",
+        "df.filter(\"price = \"+str(df.agg(min(\"price\")).collect()[0][0])).show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "64sb6PVOWDvl",
+        "outputId": "df1e1195-9416-4b69-a718-bd7cfe1458a0"
+      },
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+----------------+------------+-----+-----------+------------+\n",
+            "|          author|     edition|price|      title|year_written|\n",
+            "+----------------+------------+-----+-----------+------------+\n",
+            "|Dickens, Charles|Random House| 5.75|Bleak House|        1870|\n",
+            "+----------------+------------+-----+-----------+------------+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# No. 2 Tampilkan jumlah terbit buku dikategorikan setiap tahun ditulis!\n",
+        "\n",
+        "df.groupBy('year_written').count().sort(df.year_written).show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Q3Grm_lpWQK9",
+        "outputId": "dad03883-c462-4d5c-c41b-7abfe058a470"
+      },
+      "execution_count": 19,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+------------+-----+\n",
+            "|year_written|count|\n",
+            "+------------+-----+\n",
+            "|        1603|    1|\n",
+            "|        1814|    1|\n",
+            "|        1862|    1|\n",
+            "|        1865|    2|\n",
+            "|        1870|    1|\n",
+            "|        1875|    1|\n",
+            "|        1922|    1|\n",
+            "|        1925|    1|\n",
+            "|        1937|    1|\n",
+            "|        1967|    1|\n",
+            "|        1999|    1|\n",
+            "|        2000|    1|\n",
+            "+------------+-----+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# No. 3 Tampilkan data buku termahal tiap tahun penulisannya!\n",
+        "\n",
+        "df.groupBy('year_written').max('price').sort(asc(\"year_written\")).show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "X4VhwhkrWavh",
+        "outputId": "c3619419-b5b0-4f8c-a3ae-fa73557a5328"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+------------+----------+\n",
+            "|year_written|max(price)|\n",
+            "+------------+----------+\n",
+            "|        1603|      7.95|\n",
+            "|        1814|      18.2|\n",
+            "|        1862|      7.75|\n",
+            "|        1865|      12.7|\n",
+            "|        1870|      5.75|\n",
+            "|        1875|      13.5|\n",
+            "|        1922|      29.0|\n",
+            "|        1925|      25.0|\n",
+            "|        1937|     27.45|\n",
+            "|        1967|      14.0|\n",
+            "|        1999|     12.35|\n",
+            "|        2000|     19.95|\n",
+            "+------------+----------+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# No. 4 Tampilkan data buku termurah tiap tahun penulisannya!\n",
+        "\n",
+        "df.groupBy('year_written').min('price').sort(asc(\"year_written\")).show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "WeLdIG5TWjhs",
+        "outputId": "ec0383d1-2cdf-4e47-a38d-44be6701ed18"
+      },
+      "execution_count": 21,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+------------+----------+\n",
+            "|year_written|min(price)|\n",
+            "+------------+----------+\n",
+            "|        1603|      7.95|\n",
+            "|        1814|      18.2|\n",
+            "|        1862|      7.75|\n",
+            "|        1865|      5.76|\n",
+            "|        1870|      5.75|\n",
+            "|        1875|      13.5|\n",
+            "|        1922|      29.0|\n",
+            "|        1925|      25.0|\n",
+            "|        1937|     27.45|\n",
+            "|        1967|      14.0|\n",
+            "|        1999|     12.35|\n",
+            "|        2000|     19.95|\n",
+            "+------------+----------+\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "LNrM5VyWWxWh"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
